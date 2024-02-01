@@ -4,8 +4,25 @@ TGZ
 """
 from fabric.api import *
 import os
+from datetime import datetime
 
 env.hosts = ['100.25.203.135', '100.25.46.169']
+
+
+def do_pack():
+    """
+    Return TGZ or none
+    """
+    now = datetime.now()
+    time_string = now.strftime("%Y%m%d%H%M%S")
+    archive_name = "web_static_{}.tgz".format(time_string)
+    local("mkdir -p versions")
+    archive_path = "versions/{}".format(archive_name)
+    command = "tar -czvf {} web_static".format(archive_path)
+    result = local(command)
+    if result.failed:
+        return None
+    return archive_path
 
 
 def do_deploy(archive_path):
@@ -40,9 +57,13 @@ def do_deploy(archive_path):
         print("Error: {}".format(str(e)))
         return False
 
+
 def deploy():
-    """Create and distribute an archive to a web server."""
-    file = do_pack()
-    if file is None:
+    """
+    deploy
+    """
+    path = do_pack()
+    if path:
+        return do_deploy(path)
+    else:
         return False
-    return do_deploy(file)
