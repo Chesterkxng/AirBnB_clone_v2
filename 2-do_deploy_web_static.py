@@ -25,36 +25,32 @@ def do_pack():
 
 
 def do_deploy(archive_path):
-    """distributing archives to the web servers"""
-    if not os.path.exists(archive_path):
+    if not exists(archive_path):
         return False
-    if os.path.isfile(archive_path) is False:
-        return False
-    file = archive_path.split("/")[-1]
-    name = file.split(".")[0]
 
-    if put(archive_path, "/tmp/{}".format(file)).failed is True:
+    try:
+        put(archive_path, '/tmp/')
+
+        filename = archive_path.split('/')[-1]
+        foldername = filename.split('.')[0]
+
+        run('sudo mkdir -p /data/web_static/releases/{}/'.format(foldername))
+        run('sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}/'.
+            format(filename, foldername))
+
+        run('sudo rm /tmp/{}'.format(filename))
+
+        run('sudo mv /data/web_static/releases/{}/web_static/* '
+            '/data/web_static/releases/{}/'.
+            format(foldername, foldername))
+
+        run('sudo rm -rf /data/web_static/current')
+
+        run('sudo ln -s /data/web_static/releases/{}/ /data/web_static/current'.
+            format(foldername))
+
+        print('New version deployed!')
+        return True
+
+    except:
         return False
-    if run("sudo rm -rf /data/web_static/releases/{}/".
-           format(name)).failed is True:
-        return False
-    if run("sudo mkdir -p /data/web_static/releases/{}/".
-           format(name)).failed is True:
-        return False
-    if run("sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}/".
-           format(file, name)).failed is True:
-        return False
-    if run("sudo rm /tmp/{}".format(file)).failed is True:
-        return False
-    if run("sudo mv /data/web_static/releases/{}/web_static/* "
-           "/data/web_static/releases/{}/".format(name, name)).failed is True:
-        return False
-    if run("sudo rm -rf /data/web_static/releases/{}/web_static".
-           format(name)).failed is True:
-        return False
-    if run("sudo rm -rf /data/web_static/current").failed is True:
-        return False
-    if run("sudo ln -s /data/web_static/releases/{}/ /data/web_static/current".
-           format(name)).failed is True:
-        return False
-    return True
