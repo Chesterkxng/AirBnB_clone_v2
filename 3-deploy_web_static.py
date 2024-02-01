@@ -8,22 +8,6 @@ import os
 env.hosts = ['100.25.203.135', '100.25.46.169']
 
 
-def do_pack():
-    """
-    Return TGZ or none
-    """
-    now = datetime.now()
-    time_string = now.strftime("%Y%m%d%H%M%S")
-    archive_name = "web_static_{}.tgz".format(time_string)
-    local("sudo mkdir -p versions")
-    archive_path = "versions/{}".format(archive_name)
-    command = "sudo tar -czvf {} web_static".format(archive_path)
-    result = local(command)
-    if result.failed:
-        return None
-    return archive_path
-
-
 def do_deploy(archive_path):
     """distributing archives to the web servers"""
     if not os.path.exists(archive_path):
@@ -58,3 +42,11 @@ def do_deploy(archive_path):
            format(name)).failed is True:
         return False
     return True
+
+
+def deploy():
+    """Create and distribute an archive to a web server."""
+    file = do_pack()
+    if file is None:
+        return False
+    return do_deploy(file)
