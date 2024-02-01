@@ -2,8 +2,10 @@
 """
 
 """
+from datetime import datetime
 from fabric.api import *
 import os
+from os.path import exists
 
 env.hosts = ['100.25.203.135', '100.25.46.169']
 
