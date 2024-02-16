@@ -12,16 +12,14 @@ from os import environ
 class State(BaseModel, Base):
     __tablename__ = 'states'
     name = Column(String(128), nullable=False)
-    if environ.get('HBNB_TYPE_STORAGE') == "db":
-        cities = relationship("City", backref="state",
-                              cascade="all, delete, delete-orphan")
-    else:
-        @property
-        def cities(self):
-            "Return list of City objects"
-            dict_all_cities = models.storage.all(City)
-            list_cities = []
-            for city in dict_all_cities.values():
-                if city.state_id == self.id:
-                    list_cities.append(city)
-            return list_cities
+    cities = relationship("City", backref="state",
+                          cascade="all, delete, delete-orphan")
+    @property
+    def cities(self):
+        "Return list of City objects"
+        dict_all_cities = models.storage.all(City)
+        list_cities = []
+        for city in dict_all_cities.values():
+            if city.state_id == self.id:
+                list_cities.append(city)
+        return list_cities
